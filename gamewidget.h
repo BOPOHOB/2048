@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QPicture>
-#include "state.h"
+#include "widgetstate.h"
 
 class QTimer;
 
@@ -24,16 +24,23 @@ public:
     GameWidget(QWidget *parent = 0);
     ~GameWidget();
 
-    void setState(const State&v);
+    void setGame(Game& v);
 
-    struct Colors
+    class Colors
     {
-        QColor bg;
-        QColor field;
-        QMap<int, QColor> tablet;
-        QMap<int, QColor> font;
+    public:
+        const QColor& fontColorForValue(quint64 value) const;
+        const QColor& tabletColorForValue(quint64 value) const;
+        const QColor& background() const { return bg; }
+        const QColor& tabletBackgroung() const { return field; }
 
         Colors();
+
+    private:
+        QColor bg;
+        QColor field;
+        QVector<QColor> tablet;
+        QVector<QColor> font;
     };
 
     void setColors(const Colors& c) { colors = c; }
@@ -47,12 +54,15 @@ protected:
 
 private:
     QSize fieldSize() const;
-    void backgroundRepaint();
+    void repaintBackground();
+    static int fontPixelSize(const quint64&);
 
-    State current;
-    QTimer* const animation;
+    WidgetState* const current;
     Colors colors;
     QPicture bg;
+
+signals:
+    void arrowPressed(Qt::Edge);
 };
 
 #endif // GAMEWIDGET_H

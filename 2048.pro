@@ -15,8 +15,10 @@ TEMPLATE = app
 SOURCES += main.cpp\
         gamewidget.cpp \
     kernel/game.cpp \
-    state.cpp
+    kernel/tablet.cpp \
+    widgetstate.cpp
 
 HEADERS  += gamewidget.h \
     kernel/game.h \
-    state.h
+    kernel/tablet.h \
+    widgetstate.h
