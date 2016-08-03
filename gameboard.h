@@ -37,6 +37,7 @@ private:
     GameWidget* const game;
     QPushButton* const goSettings;
     QPushButton* const goScore;
+    int timerId;
 
     QPoint mousePressPoint;
 

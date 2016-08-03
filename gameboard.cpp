@@ -21,6 +21,7 @@ GameBoard::GameBoard(QWidget *parent)
     , game(new GameWidget(this))
     , goSettings(new QPushButton(this))
     , goScore(new QPushButton(this))
+    , timerId(-1)
 {
     this->setMinimumWidth(best->width() + current->width() + 3 * MARGIN);
     this->setMinimumHeight(300);
@@ -47,10 +48,6 @@ GameBoard::GameBoard(QWidget *parent)
 void GameBoard::resizeEvent(QResizeEvent *)
 {
     estimateStableState();
-    const WidgetsGeometry::const_iterator end(stableState.end());
-    for (WidgetsGeometry::const_iterator it(stableState.begin()); it != end; ++it) {
-        it.key()->setGeometry(it.value());
-    }
 }
 
 void GameBoard::estimateStableState()
@@ -104,13 +101,36 @@ void GameBoard::estimateStableState()
                                                                                                             MARGIN + (best->width() + goScore->width()) / 2)),
                                     (orientation == Qt::Vertical ? this->height() : topLeft.y() + mainSize.height()) - yMargin - goScore->height()),
                                     goSettings->size());
-    this->startTimer(1000 / 80);
+    if (timerId < 0) {
+        timerId = this->startTimer(1000 / 80);
+    }
 }
 
 void GameBoard::timerEvent(QTimerEvent * e)
 {
+    if (e->timerId() != timerId) {
+        e->ignore();
+        qDebug() << "unknown timer" << e->timerId() << timerId;
+    }
+    e->accept();
     if (isStable()) {
-        killTimer(e->timerId());
+        this->killTimer(timerId);
+        timerId = -1;
+        return;
+    }
+    for (WidgetsGeometry::const_iterator i(stableState.begin()); i != stableState.end(); ++i) {
+        static const int LIM(5);
+        QRect now(i.key()->geometry());
+        const QRect& stableRect(i.value());
+        const QPoint dA(stableRect.topLeft() - now.topLeft());
+        const QPoint dB(stableRect.bottomRight() - now.bottomRight());
+        if (dA.manhattanLength() < LIM && dB.manhattanLength() < LIM) {
+            now = stableRect;
+        } else {
+            now.setTopLeft(now.topLeft() + dA * .5);
+            now.setBottomRight(now.bottomRight() + dB * .5);
+        }
+        i.key()->setGeometry(now);
     }
 }
 
