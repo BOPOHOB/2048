@@ -7,20 +7,20 @@
 #include <QKeyEvent>
 
 const QPainterPath GameWidget::TABLET_PATH = ([]()->QPainterPath{
+    static const int TABLET_EDGE = 106;
+    static const int TABLET_RADIUS = 2;
     QPainterPath r;
-    r.addRoundedRect(-GameWidget::TABLET_EDGE / 2.0, -GameWidget::TABLET_EDGE / 2.0,
-                     GameWidget::TABLET_EDGE, GameWidget::TABLET_EDGE,
-                     GameWidget::TABLET_RADIUS, GameWidget::TABLET_RADIUS);
+    r.addRoundedRect(-TABLET_EDGE / 2.0, -TABLET_EDGE / 2.0,
+                     TABLET_EDGE, TABLET_EDGE,
+                     TABLET_RADIUS, TABLET_RADIUS);
     return r;
 })();
-const QString GameWidget::FONT_FAMILY = "\"Clear Sans\", \"Helvetica Neue\", Arial, sans-serif";
 
 GameWidget::GameWidget(QWidget *parent)
     : QWidget(parent)
     , current(new WidgetState(this))
 {
     connect(current, SIGNAL(newFrameReady()), this, SLOT(repaint()));
-    connect(this, &GameWidget::arrowPressed, current, &WidgetState::move);
 }
 
 GameWidget::~GameWidget()
@@ -28,7 +28,7 @@ GameWidget::~GameWidget()
 
 }
 
-void GameWidget::setGame(Game &v)
+void GameWidget::setGame(const GameObject * const v)
 {
     current->setGame(v);
 }
@@ -100,7 +100,7 @@ void GameWidget::paintEvent(QPaintEvent* e)
     painter.translate(MARGIN + TABLET_EDGE / 2.0, MARGIN + TABLET_EDGE / 2.0);
     QBrush brush(painter.brush());
     QPen pen(painter.pen());
-    QFont font(FONT_FAMILY, -1, 600);
+    QFont font;
     for (const ItemState& tablet : current->currentFrame()) {
         painter.save();
         painter.translate(STEP * tablet.position.x(), STEP * tablet.position.y());
@@ -137,33 +137,15 @@ int GameWidget::fontPixelSize(const quint64& v)
     }
 }
 
-void GameWidget::keyPressEvent(QKeyEvent* e)
+QSize GameWidget::sizeHint() const
 {
-    switch (e->key()) {
-    case Qt::Key_Left:
-        e->accept();
-        emit arrowPressed(Qt::LeftEdge);
-        break;
-    case Qt::Key_Right:
-        e->accept();
-        emit arrowPressed(Qt::RightEdge);
-        break;
-    case Qt::Key_Up:
-        e->accept();
-        emit arrowPressed(Qt::TopEdge);
-        break;
-    case Qt::Key_Down:
-        e->accept();
-        emit arrowPressed(Qt::BottomEdge);
-        break;
-    default:
-        e->ignore();
-    }
+    const QSize& gameSize(game().size());
+    return QSize((TABLET_EDGE + MARGIN) * gameSize.width() + MARGIN, (TABLET_EDGE * MARGIN) * gameSize.height() + MARGIN);
 }
 
 const QColor& GameWidget::Colors::fontColorForValue(quint64 value) const
 {
-    const int id(log2f(value) + 0.5f);
+    const int id(log2f(value) - 0.5f);
     if (id < tablet.size()) {
         return tablet.at(id);
     } else if (tablet.empty()) {
@@ -176,7 +158,7 @@ const QColor& GameWidget::Colors::fontColorForValue(quint64 value) const
 
 const QColor& GameWidget::Colors::tabletColorForValue(quint64 value) const
 {
-    const int id(log2f(value) + 0.5f);
+    const int id(log2f(value) - 0.5f);
     if (id < font.size()) {
         return font.at(id);
     } else if (font.empty()) {

@@ -9,22 +9,19 @@ class QTimer;
 
 class GameWidget : public QWidget
 {
-    Q_OBJECT
-
-public:
-    static const int EDGE = 500;
+    static const int BG_RADIUS = 4;
+    static const QPainterPath TABLET_PATH;
+    static const int EDGE = 499;
     static const int MARGIN = 15;
     static const int TABLET_EDGE = 106;
-    static const int TABLET_RADIUS = 2;
-    static const int BG_RADIUS = 4;
     static const int STEP = MARGIN + TABLET_EDGE;
-    static const QPainterPath TABLET_PATH;
-    static const QString FONT_FAMILY;
 
+public:
     GameWidget(QWidget *parent = 0);
     ~GameWidget();
 
-    void setGame(Game& v);
+    void setGame(const GameObject* const v);
+    const Game& game() const { return current->game(); }
 
     class Colors
     {
@@ -46,11 +43,12 @@ public:
     void setColors(const Colors& c) { colors = c; }
     const Colors& getColors() const { return colors; }
 
+
 protected:
     virtual void paintEvent(QPaintEvent *);
     virtual void resizeEvent(QResizeEvent*);
     virtual void initPainter(QPainter* painter);
-    virtual void keyPressEvent(QKeyEvent*);
+    virtual QSize sizeHint() const;
 
 private:
     QSize fieldSize() const;
@@ -60,9 +58,6 @@ private:
     WidgetState* const current;
     Colors colors;
     QPicture bg;
-
-signals:
-    void arrowPressed(Qt::Edge);
 };
 
 #endif // GAMEWIDGET_H

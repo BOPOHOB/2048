@@ -13,12 +13,26 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        gamewidget.cpp \
+        gamewidget/gamewidget.cpp \
     kernel/game.cpp \
     kernel/tablet.cpp \
-    widgetstate.cpp
+    gamewidget/widgetstate.cpp \
+    application.cpp \
+    mainwindow.cpp \
+    settingsboard.cpp \
+    scoreboard.cpp \
+    gameboard.cpp \
+    scorelabel.cpp \
+    kernel/gameobject.cpp
 
-HEADERS  += gamewidget.h \
+HEADERS  += gamewidget/gamewidget.h \
     kernel/game.h \
     kernel/tablet.h \
-    widgetstate.h
+    gamewidget/widgetstate.h \
+    application.h \
+    mainwindow.h \
+    settingsboard.h \
+    scoreboard.h \
+    gameboard.h \
+    scorelabel.h \
+    kernel/gameobject.h

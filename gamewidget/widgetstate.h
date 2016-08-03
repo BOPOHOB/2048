@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
-#include "kernel/game.h"
+#include "kernel/gameobject.h"
 
 struct ItemState {
     QPointF position;
@@ -36,11 +36,10 @@ class WidgetState : public QObject
 public:
     WidgetState(QObject * const parent);
 
-    void move(const Qt::Edge);
-    const QSize& size() const { return tail.size(); }
+    const QSize& size() const { return tail->size(); }
     const FrameState currentFrame() const;
-    void setGame(const Game& v) { tail = v; }
-    const Game& game() const { return tail; }
+    void setGame(const GameObject* const v);
+    const Game& game() const { return tail->game(); }
 
 signals:
     void newFrameReady();
@@ -49,7 +48,7 @@ private:
     QMap<int, ItemState> now;
     typedef QMap<int, int> MergeMap;
     MergeMap merging;
-    Game tail;
+    const GameObject* tail;
 
 };
 

@@ -11,6 +11,7 @@ uint qHash(const QPoint&);
 
 class Game
 {
+    void addNewTablet();
 public:
     typedef QMap<QPoint, Tablet> TabletMap;
 
@@ -21,10 +22,11 @@ public:
     const TabletMap& tabletMap() const { return tablets; }
 
     QMap<int, int> move(const Qt::Edge);
-    void addNewTablet();
+    quint64 score() const { return count; }
+    bool isGameOver() const;
 private:
     QSize s;
-    int score;
+    quint64 count;
     TabletMap tablets;
 };
 

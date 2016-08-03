@@ -15,18 +15,45 @@ uint qHash(const QPoint& p)
 
 Game::Game(const QSize& s)
     : s(s)
-    , score(0)
+    , count(0)
 {
     addNewTablet();
     addNewTablet();
 }
 
 Game::Game()
-    : s(4,3)
-    , score(0)
+    : s(3,4)
+    , count(0)
 {
     addNewTablet();
     addNewTablet();
+}
+
+bool Game::isGameOver() const
+{
+    if (s.width() * s.height() != tablets.size()) {
+        return false;
+    }
+    for (int i(0); i != s.width(); ++i) {
+        for (int j(0); j != s.height(); ++j) {
+            const TabletMap::const_iterator here(tablets.find(QPoint(i,j)));
+            Q_ASSERT(here != tablets.end());
+            auto test = [&here, this](const QPoint& p) {
+                if (p.x() < s.width() && p.y() < s.height()) {
+                    const TabletMap::const_iterator there(tablets.find(p));
+                    Q_ASSERT(there != tablets.end());
+                    if (there.value() == here.value()) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            if (!test(QPoint(i + 1, j)) || !test(QPoint(i, j + 1))) {
+                    return false;
+            }
+        }
+    }
+    return true;
 }
 
 QMap<int, int> Game::move(const Qt::Edge side)
@@ -75,7 +102,7 @@ QMap<int, int> Game::move(const Qt::Edge side)
                 if (neighbour != tablets.end() && neighbour.value() == itm.value() && !locked.contains(neighbour.key())) {
                     neighbour.value() <<= 1;
                     mergeList.insert(itm.value().id(), neighbour.value().id());
-                    score += neighbour.value();
+                    count += neighbour.value();
                     locked.insert(neighbour.key());
                     tablets.erase(itm);
                     moved = true;
